@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import aplpy
 from astropy.io import fits
-from numpy.core.defchararray import center
 from spectral_cube import SpectralCube
 import astropy.units as u
 import subprocess
@@ -11,7 +10,7 @@ from astropy.coordinates import SkyCoord
 from astropy.coordinates import Galactic
 
 
-def mom1_anim_center(filename, regionName ,sauv=0, sauvName = ''):
+def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = ''):
     """
     Fonction who make an animation of the moment 1 map for a data cube in fits format
     The animation is performed from the center of the cube to the end
@@ -20,15 +19,16 @@ def mom1_anim_center(filename, regionName ,sauv=0, sauvName = ''):
 
     input : 
     - filname : name of the fits cube 
-    - regionName : the name of the region for make map title
-    - sauv : save parameter of the animation, if 1 : save, if 0 : no save. 0 by default
-    - sauvName : add detail at the name of the animation. 
+    - regionName (optional, default ''): the name of the region for make map title
+    - sauv (optional, default 0) : save parameter of the animation, if 1 : save, if 0 : no save
+    - sauvName (optional, default '') : add detail at the name of the animation. 
             By default the name is animation_mom1_vFix_center.gif. Add name precision befor the .gif. 
             Attention, do not use space in the name !
 
     Return :
     Nothing, make and show plot
     """
+    
     cube = SpectralCube.read(filename)  
 
     HDU = fits.open(filename)
@@ -92,12 +92,12 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
 
     input : 
     - filname : name of the fits cube 
-    - regionName (option) : the name of the region for make map title
-    - zero (option) : define where the cube start. Alows to reject the first chanel if it's juste noise 0 by default
-    - vfix (option) : define if the color scale is fixe or not. True by default 
-    - sauv (option) : save parameter of the animation, if 1 : save, if 0 : no save. 0 by default
-    - sauvName (option) : add detail at the name of the animation. 
-            By default the name is animation_mom1_vFix_center.gif. Add name precision befor the .gif
+    - regionName (option, default '') : the name of the region for make map title
+    - zero (option, default 0) : define where the cube start. Alows to reject the first chanel if it's juste noise
+    - vfix (option, default True) : define if the color scale is fixe or not
+    - sauv (option, default 0) : save parameter of the animation, if 1 : save, if 0 : no save
+    - sauvName (option, default '') : add detail at the name of the animation. 
+            By default the name is animation_mom1.gif. Add name precision befor the .gif
             Attention, do not use space in the name !
 
     Return :
@@ -146,7 +146,7 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
     plt.show()
 
     if sauv :
-        subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=2 --colors=256 --multifile - > animation_mom1_vFix{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
+        subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=2 --colors=256 --multifile - > animation_mom1{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
         subprocess.getoutput('rm image_*.png') # efface les fichiers images temporaires
 
 def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ):
@@ -158,10 +158,10 @@ def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ):
 
     input : 
     - filname : name of the fits cube 
-    - regionName (option) : the name of the region for make map title
-    - zero (option) : define where the cube start. Alows to reject the first chanel if it's juste noise 0 by default
-    - sauv (option) : save parameter of moment map in fi fits, 1 : save, 0 : no save. 0 by default
-    - sauvName (option) : add detail at the name of the animation. 
+    - regionName (option, default '') : the name of the region for make map title
+    - zero (option, default 0) : define where the cube start. Alows to reject the first chanel if it's juste noise
+    - sauv (option, default 0) : save parameter of moment map in fi fits, 1 : save, 0 : no save
+    - sauvName (option, default '') : add detail at the name of the animation. 
             By default the name is moment1.fits. Add name precision befor the .fits
             Attention, do not use space in the name !
 
@@ -189,3 +189,31 @@ def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ):
 
     if save == 1 :    
         moment_1.write('moment1{}.fits'.format(sauvName))
+
+def imgCompar(filname1, filname2, title ='', trigger = 0.2):
+    """
+    Fonction for compare 2 fits image
+    Developed for compare moment 1 map coherent and total
+
+    input :
+    filname1, filname2 : the two filename of the image to compare
+    title (optional) : title of the plot
+    trigger (optional, default 0.2) : float, trigger to remove value close to 0 when make the image difference
+    """
+
+    HDU = fits.open(filname1)
+    cube1 = HDU[0].data
+    cube1[np.isnan(cube1)]=0
+
+    HDU = fits.open(filname2)
+    cube2 = HDU[0].data
+    cube2[np.isnan(cube2)]=0
+
+    diff = cube1-cube2
+    diff[np.abs(diff)<=trigger]=np.nan
+
+    plt.figure(figsize=(20,20))
+    plt.imshow(diff,origin="lower",cmap='jet')
+    plt.colorbar()
+    plt.title("{}".format(title))
+    plt.show()
