@@ -149,9 +149,9 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
         subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=2 --colors=256 --multifile - > animation_mom1_vFix{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
         subprocess.getoutput('rm image_*.png') # efface les fichiers images temporaires
 
-def moment1Cube(filename, regionName = '', zero = 0, save = 0 ):
+def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ):
     """
-    Fonction who make an animation of the moment 1 map for a data cube in fits format
+    Fonction who make a moment 1 map for a data cube in fits format
     The animation is performed rom one edge of the cube to the other
     Assume the cube is a Freq cube in radio
     Expresses the speed in kilometer per second
@@ -160,7 +160,10 @@ def moment1Cube(filename, regionName = '', zero = 0, save = 0 ):
     - filname : name of the fits cube 
     - regionName (option) : the name of the region for make map title
     - zero (option) : define where the cube start. Alows to reject the first chanel if it's juste noise 0 by default
-    - sauv (option) : save parameter of the animation, if 1 : save, if 0 : no save. 0 by default
+    - sauv (option) : save parameter of moment map in fi fits, 1 : save, 0 : no save. 0 by default
+    - sauvName (option) : add detail at the name of the animation. 
+            By default the name is moment1.fits. Add name precision befor the .fits
+            Attention, do not use space in the name !
 
     Return :
     Nothing, make and show plot
@@ -185,4 +188,4 @@ def moment1Cube(filename, regionName = '', zero = 0, save = 0 ):
     plt.show()
 
     if save == 1 :    
-        moment_1.write('moment1_g_w43_7_12_isolat_mean_M_pos.fits')
+        moment_1.write('moment1{}.fits'.format(sauvName))
