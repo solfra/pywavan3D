@@ -52,3 +52,18 @@ def fan_trans3D(filename,nx, ny, fitsExp = False):
     if fitsExp :
         fits.writeto("nonGaussian.fits",coherent_tot.real, header, overwrite = True) 
         fits.writeto("Gaussian.fits",gaussian_tot.real, header, overwrite = True)
+
+def partClean(part, cube) :
+    img = np.load("/user/workdir/soldanof/data/w43_7_12_iso_cnts/cohP.npy")
+    HDU = fits.open("/user/workdir/soldanof/ALMA/W43-MM1/W43-MM1_B3_spw0_7M12M_n2hp.image-isolated-contsub-crop_cut.fits")
+    cube = HDU[0].data
+    header = HDU[0].header
+    N = header['NAXIS3']
+
+    for i in range(N):
+        img[i,:,:] += np.mean(cube[i,:,:])
+
+        im_rmv = np.zeros((img.shape[1],img.shape[2]))
+        img_2d = img[i,:,:]
+        im_rmv[img_2d<=np.abs(cube[i,:,:]).mean()] = np.nan
+        img[i,:,:] = img[i,:,:] + im_rmv
