@@ -5,6 +5,14 @@ It's a 3D version of MnGSeg developed by Jean-François Robitaill. This code mak
 ## Necesary package :
 pywavan : https://github.com/jfrob27/pywavan           
 spectral cube : https://spectral-cube.readthedocs.io/en/latest/           
-astropy, numpy, mathplotlib         
+astropy, numpy, mathplotlib, subprocess
+
+Animationare make with gifsicle
 
 ## overview fonction :
+### Pywavan3D :
+ - fan_trans3D() : 3D version of fan_trans from pywavan
+
+### moment 1 : 
+ - moment1Cube() : make the moment 1 map of a cube
+ - mom1_anim_center() and mom1_anim(), two way for animate moment 1 map
