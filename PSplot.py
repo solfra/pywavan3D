@@ -1,4 +1,3 @@
-from PIL.Image import NONE
 import matplotlib.pyplot as plt
 import numpy as np
 import aplpy
@@ -20,7 +19,7 @@ def PSplot(n, wk="wave_k.npy",total="s1at.npy",gaussian="s1ag.npy",nonGauss="s1a
     - wk,total,gaussian,nonGauss (option, by defult the same as the fan_trans return) : npy files to loads for make the plot. 
 
     return :
-    Nothing, just showthe plot 
+    Nothing, just show the plot 
     """
     t = np.load(total)
     g = np.load(gaussian)
@@ -52,7 +51,7 @@ def animPSplot(wk="wave_k.npy",total="s1at.npy",gaussian="s1ag.npy",nonGauss="s1
         By default the name is animPS.gif. Add name precision befor the .gif
         Attention, do not use space in the name !
 
-    keyword sup :
+    keyword :
      - ngImg : str, place of the non-gaussian fits cube
      - gImg : str, place of the gaussian fits cube
 
@@ -95,7 +94,6 @@ def animPSplot(wk="wave_k.npy",total="s1at.npy",gaussian="s1ag.npy",nonGauss="s1
 
         elif 'ngImg' in kwargs :
             filname = kwargs.get('ngImg')
-            print('ng')
             fig = aplpy.FITSFigure(filname, figure=fig_all,slices=[i],subplot=(1, 2, 2))
             fig.show_colorscale(cmap='gray')
             fig.add_colorbar()
@@ -103,7 +101,6 @@ def animPSplot(wk="wave_k.npy",total="s1at.npy",gaussian="s1ag.npy",nonGauss="s1
 
         elif 'gImg' in kwargs :
             filname = kwargs.get('gImg')
-            print('g')
             fig = aplpy.FITSFigure(filname, figure=fig_all,slices=[i],subplot=(1, 2, 2))
             fig.show_colorscale(cmap='gray')
             fig.add_colorbar()
