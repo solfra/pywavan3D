@@ -10,7 +10,7 @@ from astropy.coordinates import SkyCoord
 from astropy.coordinates import Galactic
 
 
-def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = ''):
+def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = '', **kwargs):
     """
     Fonction who make an animation of the moment 1 map for a data cube in fits format
     The animation is performed from the center of the cube to the end
@@ -24,6 +24,10 @@ def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = ''):
     - sauvName (optional, default '') : add detail at the name of the animation. 
             By default the name is animation_mom1_vFix_center.gif. Add name precision befor the .gif. 
             Attention, do not use space in the name !
+
+    keyword :
+    - cores : list of position of the core in pixel coordinate. Use world_to_pixel for exemple for have pixel position
+                    list type [(x1,y1), (x2,y2)]
 
     Return :
     Nothing, make and show plot
@@ -69,6 +73,11 @@ def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = ''):
         f.show_colorscale(cmap = 'jet', vmin = vmin, vmax =vmax)
         f.add_colorbar()
         f.set_title("{} \n from {} to {} ".format(regionName,wmin, wmax))
+        if 'cores' in kwargs :
+            lcore = kwargs.get('cores')
+            for c in lcore :
+                f.show_markers(c[0],c[1],coords_frame='pixel',facecolor='k')
+
         plt.pause(0.1)
 
         if sauv :
@@ -83,7 +92,7 @@ def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = ''):
         subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=2 --colors=256 --multifile - > animation_mom1_vFix_center{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
         subprocess.getoutput('rm image_*.png') # efface les fichiers images temporaires
 
-def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName = ''):
+def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName = '', **kwargs):
     """
     Fonction who make an animation of the moment 1 map for a data cube in fits format
     The animation is performed rom one edge of the cube to the other
@@ -100,6 +109,10 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
             By default the name is animation_mom1.gif. Add name precision befor the .gif
             Attention, do not use space in the name !
 
+    keyword :
+    - cores : list of position of the core in pixel coordinate. Use world_to_pixel for exemple for have pixel position
+                    list type [(x1,y1), (x2,y2)]        
+
     Return :
     Nothing, make and show plot
     """
@@ -108,26 +121,29 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
     HDU = fits.open(filename)
     header = HDU[0].header
     w = wcs.WCS(header)
+    N = header['NAXIS3'] #len of the animation
 
-    N = header['NAXIS3']
     fig_all = plt.figure(1, figsize=(20,10))
 
     if vfix :
+        # calculate total moment 1 for eterminate max and min
         nii_cube = cube.with_spectral_unit(u.km/u.s,velocity_convention='radio', rest_value=header['RESTFRQ']*u.Hz)
         moment_1 = nii_cube.moment(order=1)
         vmin = np.nanmin(moment_1.hdu.data)-1
         vmax = np.nanmax(moment_1.hdu.data)+1
 
     for i in range(zero,N) :
-        wmin = w.pixel_to_world(0,0,zero)[1]
-        wmax = w.pixel_to_world(0,0,i)[1]
+        wmin = w.pixel_to_world(0,0,zero)[1] #freq min
+        wmax = w.pixel_to_world(0,0,i)[1] #freq max
+
         nii_subcube = cube.spectral_slab(wmin,wmax)
         nii_cube = nii_subcube.with_spectral_unit(u.km/u.s,velocity_convention='radio', rest_value=header['RESTFRQ']*u.Hz)
         moment_1 = nii_cube.moment(order=1)
-        
-        ax = plt.gca()
+
+        ax = plt.gca() #sert axes for plot
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
+
         f = aplpy.FITSFigure(moment_1.hdu,figure=fig_all)
         if vfix :  
             f.show_colorscale(cmap = 'jet', vmin = vmin, vmax =vmax)
@@ -135,12 +151,18 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
             f.show_colorscale(cmap = 'jet')
         f.add_colorbar()
         f.set_title("{} \n from {} to {} ".format(regionName,wmin, wmax))
+
+        if 'cores' in kwargs :
+            lcore = kwargs.get('cores')
+            for c in lcore :
+                f.show_markers(c[0],c[1],coords_frame='pixel',facecolor='k')
+
         plt.pause(0.1)
 
         if sauv :
             plt.savefig('image_' + str(i).zfill(5) + '.png', dpi=100) # sauve fichier image (pour ensuite gif anime). dpi: precision de l'image
         
-        plt.clf()
+        plt.clf() #remove figure in the plot
         plt.cla()
 
     plt.show()
@@ -149,7 +171,7 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
         subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=2 --colors=256 --multifile - > animation_mom1{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
         subprocess.getoutput('rm image_*.png') # efface les fichiers images temporaires
 
-def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ):
+def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ,**kwargs):
     """
     Fonction who make a moment 1 map for a data cube in fits format
     The animation is performed rom one edge of the cube to the other
@@ -164,6 +186,10 @@ def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ):
     - sauvName (option, default '') : add detail at the name of the animation. 
             By default the name is moment1.fits. Add name precision befor the .fits
             Attention, do not use space in the name !
+
+    keyword :
+    - cores : list of position of the core in pixel coordinate. Use world_to_pixel for exemple for have pixel position
+                    list type [(x1,y1), (x2,y2)]
 
     Return :
     Nothing, make and show plot
@@ -185,6 +211,10 @@ def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ):
     f.show_colorscale(cmap='jet')
     f.add_colorbar()
     f.set_title("{} \n from {} to {} ".format(regionName,wmin, wmax))
+    if 'cores' in kwargs :
+        lcore = kwargs.get('cores')
+        for c in lcore :
+            f.show_markers(c[0],c[1],coords_frame='pixel',facecolor='k')
     plt.show()
 
     if save == 1 :    
