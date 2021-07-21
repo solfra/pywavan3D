@@ -13,6 +13,10 @@ Animationare make with gifsicle
 ### Pywavan3D :
  - fan_trans3D() : 3D version of fan_trans from pywavan
 
+### Power Spectrum plot :
+ - PSplot() : plot simply a power specctrum
+ - animPSplot() : make animation of the power spectrum plot, whith or whithout gaussian and/or non-gaussian component
+
 ### moment 1 : 
  - moment1Cube() : make the moment 1 map of a cube
- - mom1_anim_center() and mom1_anim(), two way for animate moment 1 map
+ - mom1_anim_center() and mom1_anim(), tow way for animate moment 1 map
