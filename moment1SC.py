@@ -89,7 +89,7 @@ def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = '', **kwargs):
     plt.show()
 
     if sauv :
-        subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=2 --colors=256 --multifile - > animation_mom1_vFix_center{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
+        subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=30 --loop --optimize=2 --colors=256 --multifile - > animation_mom1_vFix_center{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
         subprocess.getoutput('rm image_*.png') # efface les fichiers images temporaires
 
 def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName = '', **kwargs):
@@ -168,10 +168,10 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
     plt.show()
 
     if sauv :
-        subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=2 --colors=256 --multifile - > animation_mom1{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
+        subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=30 --loop --optimize=2 --colors=256 --multifile - > animation_mom1{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
         subprocess.getoutput('rm image_*.png') # efface les fichiers images temporaires
 
-def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ,**kwargs):
+def moment1Cube(filename, regionName = '', zero = 0, sauv = 0, sauvName ='' ,**kwargs):
     """
     Fonction who make a moment 1 map for a data cube in fits format
     The animation is performed rom one edge of the cube to the other
@@ -217,7 +217,7 @@ def moment1Cube(filename, regionName = '', zero = 0, save = 0, sauvName ='' ,**k
             f.show_markers(c[0],c[1],coords_frame='pixel',facecolor='k')
     plt.show()
 
-    if save == 1 :    
+    if sauv == 1 :    
         moment_1.write('moment1{}.fits'.format(sauvName))
 
 def imgCompar(filname1, filname2, title ='', trigger = 0.2):
