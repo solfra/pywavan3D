@@ -1,5 +1,5 @@
 # pywavan3D
-This code are devolped during my M1 stage whith Jean-François Robitaill and Frederique Motte at IPAG.    
+This code are devolped during my M1 stage whith Jean-François Robitaille and Frederique Motte at IPAG.    
 It's a 3D version of MnGSeg developed by Jean-François Robitaill. This code make also new visualisation of a 3D data cube, including moment 0 and moment 1 map for the coherent part.
 
 ## Necesary package :
