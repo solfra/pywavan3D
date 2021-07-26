@@ -5,13 +5,16 @@ from astropy.io import fits
 def fan_trans3D(filename,nx, ny, fitsExp = False):
     """
     3D version of fan_trans from pywavan
-    For this versio, fan_trans using the argument apodize and arrdim
+    For this version, fan_trans using the argument apodize and arrdim
     q is set to 2.0 and not using qdyn parmeter
 
     input :
     filename : fits data cube name
     nx, ny sizes including the zero value pixel padding
     fitsExp (option , false by default) : option for export coherent and gaussian part in fits
+
+    Output : 
+    Save on the current directory the coherent and gaussian part and also S1a coef and wave_k coef.
     """
 
     HDU = fits.open(filename)
@@ -53,17 +56,40 @@ def fan_trans3D(filename,nx, ny, fitsExp = False):
         fits.writeto("nonGaussian.fits",coherent_tot.real, header, overwrite = True) 
         fits.writeto("Gaussian.fits",gaussian_tot.real, header, overwrite = True)
 
-def partClean(part, cube) :
-    img = np.load("/user/workdir/soldanof/data/w43_7_12_iso_cnts/cohP.npy")
-    HDU = fits.open("/user/workdir/soldanof/ALMA/W43-MM1/W43-MM1_B3_spw0_7M12M_n2hp.image-isolated-contsub-crop_cut.fits")
+def partClean(part, filename, addMean = True, **kwargs) :
+    """
+    Add mean value of the original cube and clean the cube.
+    This fonction is using before make the moment 1 map. If you do not removed this false value, the moment 1 can be non sens.
+
+    Input : 
+    part : npy file, the part to be cleening
+    filname : fits original cube
+    addMean (option, True by default) : option for precise if the mean of the original cube must be added or not
+
+    Keyword : 
+    Rmin : limit value for removed data. If not precise, it's the mean value of the original image who is used
+
+    Return :
+    img : the new cube
+    """
+    img = np.load(part)
+    HDU = fits.open(filename)
     cube = HDU[0].data
     header = HDU[0].header
     N = header['NAXIS3']
 
     for i in range(N):
-        img[i,:,:] += np.mean(cube[i,:,:])
+        if addMean :
+            img[i,:,:] += np.mean(cube[i,:,:])
+        
+        if 'Rmin' in kwargs :
+            rmin = kwargs.get('Rmin')
+        else : 
+            rmin = np.abs(cube[i,:,:]).mean()
 
         im_rmv = np.zeros((img.shape[1],img.shape[2]))
         img_2d = img[i,:,:]
-        im_rmv[img_2d<=np.abs(cube[i,:,:]).mean()] = np.nan
+        im_rmv[img_2d<=rmin] = np.nan
         img[i,:,:] = img[i,:,:] + im_rmv
+    
+    return img
