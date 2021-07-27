@@ -93,3 +93,56 @@ def partClean(part, filename, addMean = True, **kwargs) :
         img[i,:,:] = img[i,:,:] + im_rmv
     
     return img
+
+
+def fan_trans3D_scale(filename,nx, ny, part='coh', zmin = 0, zmax= 0, partSum =False):
+    """
+    3D version of fan_trans from pywavan
+    This foncion permit to save cohereant and/or gaussian part whithit scales' image
+    For this version, fan_trans using the argument apodize and arrdim
+    q is set to 2.0 and not using qdyn parmeter
+
+    input :
+    filename : fits data cube name
+    nx, ny sizes including the zero value pixel padding
+    part (option, coh by default) : choose the part to save. keyword : 'all', 'coh', 'gau'
+    zmin (option, 0 by default) : minimum scale value. Number of scale to removed. Wood be an int >0
+    zmax (option, 0 by default) : maximum scale value. Number of scale to removed. Wood be an int >0
+    partSum (option, False by default) : choose if you want to save directly the cube after sum on the scale selescted
+
+    Output : 
+    Save on the current directory the coherent and/or gaussian part scale by scale
+    """
+
+    HDU = fits.open(filename)
+    cube = HDU[0].data
+    header = HDU[0].header
+    reso = header ['CDELT2']*60
+    M = nb_scale((nx,ny))
+    N = header['NAXIS3']
+
+    coherent_tot = []
+    gaussian_tot = []
+
+
+    for i in range(N) :
+        q = []
+        q= [2.0]*M
+        print("data number",i)
+        wt, S11a, wave_k, S1a, q =  fan_trans(cube[i,:,:], reso=reso, angular=False,q=q,apodize = 0.98, arrdim = np.array([nx,ny]))
+
+        coherent = wt[(M+zmin):(2*M-zmax),:,:]
+        Gaussian = wt[(2*M+zmin):(3*M-zmax),:,:] 
+
+        if partSum : 
+            coherent = np.sum(wt[(M+zmin):(2*M-zmax),:,:],axis=0)
+            Gaussian = np.sum(wt[(2*M+zmin):(3*M-zmax),:,:],axis=0)
+
+        coherent_tot.append( coherent )
+        gaussian_tot.append( Gaussian )
+
+    if part == 'coh' or part == 'all' :
+        np.save("cohScale.npy", coherent_tot)
+    if part == 'gau' or part == 'all' :
+        np.save("gauScale.npy", gaussian_tot)
+
