@@ -31,6 +31,7 @@ def mom1_anim_center(filename, regionName='' ,sauv=0, sauvName = '', **kwargs):
 
     Return :
     Nothing, make and show plot
+    If save = 1, save the animation gif on the current directory
     """
     
     cube = SpectralCube.read(filename)  
@@ -115,6 +116,7 @@ def mom1_anim(filename, regionName = '', zero =0, vfix = True ,sauv=0, sauvName 
 
     Return :
     Nothing, make and show plot
+    If save = 1, save the animation gif on the current directory
     """
     cube = SpectralCube.read(filename)  
 
@@ -193,6 +195,7 @@ def moment1Cube(filename, regionName = '', zero = 0, sauv = 0, sauvName ='' ,**k
 
     Return :
     Nothing, make and show plot
+    If save = 1, save the moment 1 fits on the current directory
     """
 
     cube = SpectralCube.read(filename)  
@@ -226,9 +229,12 @@ def imgCompar(filname1, filname2, title ='', trigger = 0.2):
     Developed for compare moment 1 map coherent and total
 
     input :
-    filname1, filname2 : the two filename of the image to compare
-    title (optional) : title of the plot
-    trigger (optional, default 0.2) : float, trigger to remove value close to 0 when make the image difference
+    - filname1, filname2 : the two filename of the image to compare
+    - title (optional) : title of the plot
+    - trigger (optional, default 0.2) : float, trigger to remove value close to 0 when make the image difference
+
+    Return :
+    Nothing, make and show plot
     """
 
     HDU = fits.open(filname1)
@@ -247,3 +253,71 @@ def imgCompar(filname1, filname2, title ='', trigger = 0.2):
     plt.colorbar()
     plt.title("{}".format(title))
     plt.show()
+
+def imgComparAnim(filname1, filname2,sauv = 0,sauvName='', **kwargs):
+    """
+    Fonction for animate vertical compareaison between 2 fits image
+    Developed for compare moment 1 map coherent and total
+
+    input :
+    - filname1, filname2 : the two filename of the image to compare
+    - sauv (option, default 0) : save parameter of moment map in fi fits, 1 : save, 0 : no save
+    - sauvName (option, default '') : add detail at the name of the animation. 
+            By default the name is moment1.fits. Add name precision befor the .fits
+            Attention, do not use space in the name !
+
+    keyword : 
+    name1 and name2 : the two name appear on the image title. If not used it's the filename who is used
+
+    Return :
+    Nothing, make and show plot
+    If save = 1, save the animation gif on the current directory
+    """
+
+    HDU = fits.open(filname1)
+    cube1 = HDU[0].data
+
+    HDU = fits.open(filname2)
+    cube2 = HDU[0].data
+    min1 = np.nanmin(cube1)
+    max1 = np.nanmax(cube1)
+    min2 = np.nanmin(cube2)
+    max2 = np.nanmax(cube2)
+
+    if 'name1' in kwargs :
+        name1 = kwargs.get('name1')
+    else :
+        name1 = filname1
+
+    if 'name2' in kwargs :
+            name2 = kwargs.get('name2')
+    else :
+        name2 = filname2
+
+    for i in range(int(2*cube1.shape[1]/5)):
+    
+        im_comp = np.zeros((cube1.shape[0],cube1.shape[1]))
+        if i<cube1.shape[1]/5 :
+            cut = 5*i
+        else :
+            cut = cube1.shape[1]-5*(i-int(cube1.shape[1]/5))
+        im_comp[:,0:cut] += cube1[:,0:cut]
+        im_comp[:,cut:cube2.shape[1]] += cube2[:,cut:cube2.shape[1]]
+        plt.imshow(im_comp,origin="lower",cmap='jet', vmin = min(min1,min2), vmax =max(max1,max2))
+        plt.axvline(x=cut ,color="k", linestyle="-",linewidth =2) 
+        plt.colorbar()
+        plt.title("comparaison between {} and {}".format(name1, name2))
+
+        plt.pause(0.1)
+
+        if sauv :
+            plt.savefig('image_' + str(i).zfill(5) + '.png', dpi=99) # sauve fichier image (pour ensuite gif anime). dpi: precision de l'image
+
+        plt.clf()
+        plt.cla()
+
+    plt.show()
+
+    if sauv :
+        subprocess.getoutput('convert image_*.png GIF:- | gifsicle --delay=10 --loop --optimize=1 --colors=256 --multifile - > anim_compare{}.gif'.format(sauvName)) # avec gifsicle (plus efficace).
+        subprocess.getoutput('rm image_*.png') # efface les fichiers images temporaires
