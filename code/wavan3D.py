@@ -58,7 +58,7 @@ def fan_trans3D(filename,nx, ny, fitsExp = False):
         fits.writeto("nonGaussian.fits",coherent_tot.real, header, overwrite = True) 
         fits.writeto("Gaussian.fits",gaussian_tot.real, header, overwrite = True)
 
-def partClean(part, filename, addMean = True, **kwargs) :
+def partClean(part, filename, addMean = True, sauv = 1, sauvName = '', **kwargs) :
     """
     Add mean value of the original cube and clean the cube.
     This fonction is using before make the moment 1 map. If you do not removed this false value, the moment 1 can be non sens.
@@ -67,12 +67,16 @@ def partClean(part, filename, addMean = True, **kwargs) :
     part : npy file, the part to be cleening
     filname : fits original cube
     addMean (option, True by default) : option for precise if the mean of the original cube must be added or not
+    - sauv (optional, default 0) : save parameter of the animation, if 1 : save, if 0 : no save
+    - sauvName (optional, default '') : add detail at the name of fits cube. 
+            Attention, do not use space in the name !
 
     Keyword : 
     Rmin : limit value for removed data. If not precise, it's the mean value of the original image who is used
 
     Return :
-    img : the new cube
+    if sauv=0 : img : the new cube in numpy array
+    if sauv = 1 : save the fits cube
     """
     img = np.load(part)
     HDU = fits.open(filename)
@@ -94,7 +98,11 @@ def partClean(part, filename, addMean = True, **kwargs) :
         im_rmv[img_2d<=rmin] = np.nan
         img[i,:,:] = img[i,:,:] + im_rmv
     
-    return img
+
+    if sauv == 1 :
+        fits.writeto("imgClean{}.fits".format(sauvName),img.real, header, overwrite = True)
+    else : 
+        return img
 
 
 def fan_trans3D_scale(filename,nx, ny, part='coh', zmin = 0, zmax= 0, partSum =False):
