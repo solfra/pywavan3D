@@ -53,6 +53,8 @@ def fan_trans3D(filename,nx, ny, fitsExp = False):
     np.save("wave_k.npy",wave_k)
 
     if fitsExp :
+        coherent_tot= np.array(coherent_tot)
+        gaussian_tot= np.array(gaussian_tot)
         fits.writeto("nonGaussian.fits",coherent_tot.real, header, overwrite = True) 
         fits.writeto("Gaussian.fits",gaussian_tot.real, header, overwrite = True)
 
