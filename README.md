@@ -6,7 +6,11 @@ This repository is organised as follows :
 - code : all useful fonction 
 - g353 and w43 : all notebook for this region
 - g353_feathered_isolated and w43_7+12m isolated : notebook and annimation make for this region
-- 3d_test : test of a 3d wavelet, not workink
+- 3d_test : test of a 3d wavelet, not working
+
+You find two type of notebook : 
+- cube : compute coherent and gaussian cube and power spectrum
+- traitement_donnee : make all data processing, including moment 0 and moment 1 Map.
 
 ## Necesary package :
 pywavan : https://github.com/jfrob27/pywavan           
